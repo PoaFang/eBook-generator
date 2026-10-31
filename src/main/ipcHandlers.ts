@@ -23,7 +23,7 @@ import { exportPdf } from './pdf/exportPdf'
 import { extractPdfPagesToImages } from './pdfPages'
 import { registerTempDir, cleanupAllTempDirs } from './tempDirs'
 import { isCalibreAvailable, convertEpubWithCalibre } from './calibre'
-import { withRateLimitRetry } from './providers/retry'
+import { withRetry } from './providers/retry'
 
 const IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png', 'webp', 'heic', 'tiff', 'tif', 'bmp']
 
@@ -93,7 +93,7 @@ export function registerIpcHandlers(mainWindow: BrowserWindow, keyStore: KeyStor
     }
     const prepared = await prepareImageForOcr(request.imagePath)
     const provider = getOcrProvider(request.provider)
-    const text = await withRateLimitRetry(() =>
+    const text = await withRetry(() =>
       provider.runOcr({
         base64Image: prepared.base64,
         mimeType: prepared.mimeType,
@@ -109,7 +109,7 @@ export function registerIpcHandlers(mainWindow: BrowserWindow, keyStore: KeyStor
       throw new Error(`尚未設定 ${request.provider} 的 API Key`)
     }
     const provider = getTranslateProvider(request.provider)
-    const text = await withRateLimitRetry(() =>
+    const text = await withRetry(() =>
       provider.translate({
         text: request.text,
         targetLanguage: request.targetLanguage,

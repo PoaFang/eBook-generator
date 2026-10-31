@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest'
-import { classifyRetryableError, withRateLimitRetry } from '../src/main/providers/retry'
+import { classifyRetryableError, withRetry } from '../src/main/providers/retry'
 
 const GEMINI_429_MESSAGE = JSON.stringify({
   error: {
@@ -17,20 +17,28 @@ const GEMINI_429_MESSAGE = JSON.stringify({
   }
 })
 
+const GEMINI_503_MESSAGE = JSON.stringify({
+  error: {
+    code: 503,
+    message: 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.',
+    status: 'UNAVAILABLE'
+  }
+})
+
 describe('classifyRetryableError', () => {
-  it('does not treat a plain error as rate-limited', () => {
-    expect(classifyRetryableError(new Error('something unrelated went wrong'))).toEqual({ isRateLimited: false })
+  it('does not treat a plain error as retryable', () => {
+    expect(classifyRetryableError(new Error('something unrelated went wrong'))).toEqual({ isRetryable: false })
   })
 
-  it('does not treat a 401 (bad API key) as rate-limited', () => {
+  it('does not treat a 401 (bad API key) as retryable', () => {
     const error = Object.assign(new Error('Incorrect API key provided'), { status: 401 })
-    expect(classifyRetryableError(error).isRateLimited).toBe(false)
+    expect(classifyRetryableError(error).isRetryable).toBe(false)
   })
 
-  it('treats an HTTP 429 status as rate-limited even with no further hints', () => {
+  it('treats an HTTP 429 status as retryable even with no further hints', () => {
     const error = Object.assign(new Error('Too Many Requests'), { status: 429 })
     const result = classifyRetryableError(error)
-    expect(result.isRateLimited).toBe(true)
+    expect(result.isRetryable).toBe(true)
     expect(result.retryDelayMs).toBeUndefined()
   })
 
@@ -42,12 +50,24 @@ describe('classifyRetryableError', () => {
   it('recognizes Gemini RESOURCE_EXHAUSTED by message alone (no .status field) and parses retryDelay', () => {
     const error = new Error(GEMINI_429_MESSAGE)
     const result = classifyRetryableError(error)
-    expect(result.isRateLimited).toBe(true)
+    expect(result.isRetryable).toBe(true)
     expect(result.retryDelayMs).toBe(24930) // ceil(24.929668305 * 1000)
+  })
+
+  it('recognizes Gemini UNAVAILABLE (model overloaded, HTTP 503) with no retryDelay given', () => {
+    const error = new Error(GEMINI_503_MESSAGE)
+    const result = classifyRetryableError(error)
+    expect(result.isRetryable).toBe(true)
+    expect(result.retryDelayMs).toBeUndefined()
+  })
+
+  it('treats a bare HTTP 503 status as retryable', () => {
+    const error = Object.assign(new Error('Service Unavailable'), { status: 503 })
+    expect(classifyRetryableError(error).isRetryable).toBe(true)
   })
 })
 
-describe('withRateLimitRetry', () => {
+describe('withRetry', () => {
   beforeEach(() => {
     vi.useFakeTimers()
   })
@@ -58,13 +78,13 @@ describe('withRateLimitRetry', () => {
 
   it('returns the result immediately when the function succeeds on the first try', async () => {
     const fn = vi.fn().mockResolvedValue('ok')
-    await expect(withRateLimitRetry(fn)).resolves.toBe('ok')
+    await expect(withRetry(fn)).resolves.toBe('ok')
     expect(fn).toHaveBeenCalledTimes(1)
   })
 
-  it('does not retry a non-rate-limit error', async () => {
+  it('does not retry a non-retryable error', async () => {
     const fn = vi.fn().mockRejectedValue(new Error('invalid request'))
-    await expect(withRateLimitRetry(fn)).rejects.toThrow('invalid request')
+    await expect(withRetry(fn)).rejects.toThrow('invalid request')
     expect(fn).toHaveBeenCalledTimes(1)
   })
 
@@ -75,8 +95,18 @@ describe('withRateLimitRetry', () => {
     })
     const fn = vi.fn().mockRejectedValueOnce(rateLimitError).mockResolvedValueOnce('ok')
 
-    const promise = withRateLimitRetry(fn)
+    const promise = withRetry(fn)
     await vi.advanceTimersByTimeAsync(5000)
+
+    await expect(promise).resolves.toBe('ok')
+    expect(fn).toHaveBeenCalledTimes(2)
+  })
+
+  it('retries a 503 "model overloaded" error with the default delay (no retryDelay given) and succeeds', async () => {
+    const fn = vi.fn().mockRejectedValueOnce(new Error(GEMINI_503_MESSAGE)).mockResolvedValueOnce('ok')
+
+    const promise = withRetry(fn)
+    await vi.advanceTimersByTimeAsync(15_000) // default delay
 
     await expect(promise).resolves.toBe('ok')
     expect(fn).toHaveBeenCalledTimes(2)
@@ -86,7 +116,7 @@ describe('withRateLimitRetry', () => {
     const rateLimitError = Object.assign(new Error('Too Many Requests'), { status: 429 })
     const fn = vi.fn().mockRejectedValue(rateLimitError)
 
-    const promise = withRateLimitRetry(fn)
+    const promise = withRetry(fn)
     const assertion = expect(promise).rejects.toThrow('Too Many Requests')
     await vi.runAllTimersAsync()
     await assertion
@@ -102,7 +132,7 @@ describe('withRateLimitRetry', () => {
     })
     const fn = vi.fn().mockRejectedValueOnce(rateLimitError).mockResolvedValueOnce('ok')
 
-    const promise = withRateLimitRetry(fn)
+    const promise = withRetry(fn)
     await vi.advanceTimersByTimeAsync(60_000) // the capped max
 
     await expect(promise).resolves.toBe('ok')
