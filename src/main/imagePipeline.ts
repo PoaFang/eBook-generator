@@ -24,3 +24,16 @@ export async function prepareImageForOcr(filePath: string): Promise<PreparedImag
 
   return { base64: buffer.toString('base64'), mimeType: 'image/jpeg' }
 }
+
+const COVER_MAX_DIMENSION = 1600
+const COVER_JPEG_QUALITY = 90
+
+/** Normalizes an arbitrary cover image to an orientation-corrected JPEG for embedding in EPUB/PDF output. */
+export async function prepareCoverImage(filePath: string): Promise<Buffer> {
+  const input = await readFile(filePath)
+  return sharp(input)
+    .rotate()
+    .resize({ width: COVER_MAX_DIMENSION, height: COVER_MAX_DIMENSION, fit: 'inside', withoutEnlargement: true })
+    .jpeg({ quality: COVER_JPEG_QUALITY })
+    .toBuffer()
+}

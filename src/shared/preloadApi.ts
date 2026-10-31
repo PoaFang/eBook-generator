@@ -1,9 +1,11 @@
 import type {
   ApiKeyEntry,
   ExportEpubRequest,
+  ExportPdfRequest,
   ExportResult,
   OcrRequest,
   OcrResponse,
+  PdfExtractPagesResponse,
   ProviderId,
   TranslateRequest,
   TranslateResponse
@@ -16,8 +18,10 @@ export interface FayinApi {
     delete(provider: ProviderId): Promise<void>
   }
   dialog: {
-    selectImages(): Promise<string[]>
+    selectSourceFiles(): Promise<string[]>
+    selectCoverImage(): Promise<string | null>
     saveEpub(defaultName: string): Promise<string | null>
+    savePdf(defaultName: string): Promise<string | null>
   }
   ocr: {
     runPage(request: OcrRequest): Promise<OcrResponse>
@@ -25,5 +29,9 @@ export interface FayinApi {
   translate: {
     runPage(request: TranslateRequest): Promise<TranslateResponse>
   }
+  pdf: {
+    extractPages(pdfPath: string): Promise<PdfExtractPagesResponse>
+  }
   exportEpub(request: ExportEpubRequest): Promise<ExportResult>
+  exportPdf(request: ExportPdfRequest): Promise<ExportResult>
 }

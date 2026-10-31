@@ -87,6 +87,25 @@ function runSmokeTest(mainWindow: BrowserWindow, keyStore: KeyStore): void {
       console.log(`[smoke-test:sharp-in-electron] FAILED: ${error instanceof Error ? error.stack : error}`)
     }
 
+    try {
+      const epubOut = join(tmpdir(), 'fayin-smoke-test.epub')
+      const pdfOut = join(tmpdir(), 'fayin-smoke-test.pdf')
+      const result = await mainWindow.webContents.executeJavaScript(`
+        (async () => {
+          const metadata = { title: 'Smoke Test Book', author: 'Smoke Tester', language: 'en' }
+          const pages = [{ id: 'p1', text: 'Hello from the smoke test.', chapterTitle: 'Chapter 1' }]
+          const epubResult = await window.api.exportEpub({ metadata, pages, destPath: ${JSON.stringify(epubOut)} })
+          const pdfResult = await window.api.exportPdf({ metadata, pages, destPath: ${JSON.stringify(pdfOut)} })
+          return JSON.stringify({ epubResult, pdfResult })
+        })()
+      `)
+      console.log(`[smoke-test:export-roundtrip] ${result}`)
+      const { statSync } = await import('node:fs')
+      console.log(`[smoke-test:export-filesizes] epub=${statSync(epubOut).size}B pdf=${statSync(pdfOut).size}B`)
+    } catch (error) {
+      console.log(`[smoke-test:export-roundtrip] FAILED: ${error instanceof Error ? error.stack : error}`)
+    }
+
     app.exit(0)
   })
 }

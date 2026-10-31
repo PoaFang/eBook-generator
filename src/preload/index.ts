@@ -3,9 +3,11 @@ import { IPC } from '@shared/ipcChannels'
 import type {
   ApiKeyEntry,
   ExportEpubRequest,
+  ExportPdfRequest,
   ExportResult,
   OcrRequest,
   OcrResponse,
+  PdfExtractPagesResponse,
   ProviderId,
   TranslateRequest,
   TranslateResponse
@@ -19,8 +21,10 @@ const api: FayinApi = {
     delete: (provider: ProviderId): Promise<void> => ipcRenderer.invoke(IPC.KEYS_DELETE, provider)
   },
   dialog: {
-    selectImages: (): Promise<string[]> => ipcRenderer.invoke(IPC.DIALOG_SELECT_IMAGES),
-    saveEpub: (defaultName: string): Promise<string | null> => ipcRenderer.invoke(IPC.DIALOG_SAVE_EPUB, defaultName)
+    selectSourceFiles: (): Promise<string[]> => ipcRenderer.invoke(IPC.DIALOG_SELECT_SOURCE_FILES),
+    selectCoverImage: (): Promise<string | null> => ipcRenderer.invoke(IPC.DIALOG_SELECT_COVER_IMAGE),
+    saveEpub: (defaultName: string): Promise<string | null> => ipcRenderer.invoke(IPC.DIALOG_SAVE_EPUB, defaultName),
+    savePdf: (defaultName: string): Promise<string | null> => ipcRenderer.invoke(IPC.DIALOG_SAVE_PDF, defaultName)
   },
   ocr: {
     runPage: (request: OcrRequest): Promise<OcrResponse> => ipcRenderer.invoke(IPC.OCR_RUN_PAGE, request)
@@ -29,7 +33,12 @@ const api: FayinApi = {
     runPage: (request: TranslateRequest): Promise<TranslateResponse> =>
       ipcRenderer.invoke(IPC.TRANSLATE_RUN_PAGE, request)
   },
-  exportEpub: (request: ExportEpubRequest): Promise<ExportResult> => ipcRenderer.invoke(IPC.EXPORT_EPUB, request)
+  pdf: {
+    extractPages: (pdfPath: string): Promise<PdfExtractPagesResponse> =>
+      ipcRenderer.invoke(IPC.PDF_EXTRACT_PAGES, pdfPath)
+  },
+  exportEpub: (request: ExportEpubRequest): Promise<ExportResult> => ipcRenderer.invoke(IPC.EXPORT_EPUB, request),
+  exportPdf: (request: ExportPdfRequest): Promise<ExportResult> => ipcRenderer.invoke(IPC.EXPORT_PDF, request)
 }
 
 contextBridge.exposeInMainWorld('api', api)

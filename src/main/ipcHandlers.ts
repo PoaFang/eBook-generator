@@ -1,11 +1,15 @@
-import { ipcMain, dialog, type BrowserWindow } from 'electron'
-import { writeFile } from 'node:fs/promises'
+import { app, ipcMain, dialog, type BrowserWindow } from 'electron'
+import { writeFile, mkdtemp, readFile } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 import { IPC } from '@shared/ipcChannels'
 import type {
   ExportEpubRequest,
+  ExportPdfRequest,
   ExportResult,
   OcrRequest,
   OcrResponse,
+  PdfExtractPagesResponse,
   TranslateRequest,
   TranslateResponse
 } from '@shared/types'
@@ -13,6 +17,11 @@ import type { KeyStore } from './keyStore'
 import { prepareImageForOcr } from './imagePipeline'
 import { getOcrProvider, getTranslateProvider } from './providers/registry'
 import { buildEpub } from './epub/buildEpub'
+import { exportPdf } from './pdf/exportPdf'
+import { extractPdfPagesToImages } from './pdfPages'
+import { registerTempDir, cleanupAllTempDirs } from './tempDirs'
+
+const IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png', 'webp', 'heic', 'tiff', 'tif', 'bmp']
 
 export function registerIpcHandlers(mainWindow: BrowserWindow, keyStore: KeyStore): void {
   ipcMain.handle(IPC.KEYS_SET, async (_event, provider: Parameters<KeyStore['setKey']>[0], apiKey: string) => {
@@ -25,13 +34,26 @@ export function registerIpcHandlers(mainWindow: BrowserWindow, keyStore: KeyStor
     keyStore.deleteKey(provider)
   })
 
-  ipcMain.handle(IPC.DIALOG_SELECT_IMAGES, async () => {
+  ipcMain.handle(IPC.DIALOG_SELECT_SOURCE_FILES, async () => {
     const result = await dialog.showOpenDialog(mainWindow, {
       properties: ['openFile', 'multiSelections'],
-      filters: [{ name: 'Images', extensions: ['jpg', 'jpeg', 'png', 'webp', 'heic', 'tiff', 'tif', 'bmp'] }]
+      filters: [
+        { name: 'Images & PDF', extensions: [...IMAGE_EXTENSIONS, 'pdf'] },
+        { name: 'Images', extensions: IMAGE_EXTENSIONS },
+        { name: 'PDF', extensions: ['pdf'] }
+      ]
     })
     if (result.canceled) return []
     return result.filePaths
+  })
+
+  ipcMain.handle(IPC.DIALOG_SELECT_COVER_IMAGE, async () => {
+    const result = await dialog.showOpenDialog(mainWindow, {
+      properties: ['openFile'],
+      filters: [{ name: 'Images', extensions: IMAGE_EXTENSIONS }]
+    })
+    if (result.canceled || result.filePaths.length === 0) return null
+    return result.filePaths[0]
   })
 
   ipcMain.handle(IPC.DIALOG_SAVE_EPUB, async (_event, defaultName: string) => {
@@ -41,6 +63,23 @@ export function registerIpcHandlers(mainWindow: BrowserWindow, keyStore: KeyStor
     })
     if (result.canceled || !result.filePath) return null
     return result.filePath
+  })
+
+  ipcMain.handle(IPC.DIALOG_SAVE_PDF, async (_event, defaultName: string) => {
+    const result = await dialog.showSaveDialog(mainWindow, {
+      defaultPath: `${defaultName}.pdf`,
+      filters: [{ name: 'PDF', extensions: ['pdf'] }]
+    })
+    if (result.canceled || !result.filePath) return null
+    return result.filePath
+  })
+
+  ipcMain.handle(IPC.PDF_EXTRACT_PAGES, async (_event, pdfPath: string): Promise<PdfExtractPagesResponse> => {
+    const pdfBytes = await readFile(pdfPath)
+    const outDir = await mkdtemp(join(tmpdir(), 'fayin-pdf-pages-'))
+    registerTempDir(outDir)
+    const imagePaths = await extractPdfPagesToImages(pdfBytes, outDir)
+    return { imagePaths }
   })
 
   ipcMain.handle(IPC.OCR_RUN_PAGE, async (_event, request: OcrRequest): Promise<OcrResponse> => {
@@ -74,14 +113,19 @@ export function registerIpcHandlers(mainWindow: BrowserWindow, keyStore: KeyStor
 
   ipcMain.handle(IPC.EXPORT_EPUB, async (_event, request: ExportEpubRequest): Promise<ExportResult> => {
     try {
-      const buffer = await buildEpub(
-        request.metadata,
-        request.pages.map((p) => ({ id: p.id, text: p.text }))
-      )
+      const buffer = await buildEpub(request.metadata, request.pages)
       await writeFile(request.destPath, buffer)
       return { success: true, filePath: request.destPath }
     } catch (error) {
       return { success: false, error: error instanceof Error ? error.message : String(error) }
     }
+  })
+
+  ipcMain.handle(IPC.EXPORT_PDF, async (_event, request: ExportPdfRequest): Promise<ExportResult> => {
+    return exportPdf(request)
+  })
+
+  app.on('before-quit', () => {
+    cleanupAllTempDirs()
   })
 }

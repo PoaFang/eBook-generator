@@ -31,6 +31,9 @@ export interface PageItem {
   rawText?: string
   translatedText?: string
   error?: string
+  /** When set, this page starts a new chapter with this title. Pages
+   *  without one are appended to the preceding chapter. */
+  chapterTitle?: string
 }
 
 export interface OcrRequest {
@@ -63,9 +66,21 @@ export interface BookMetadata {
   coverImagePath?: string
 }
 
+export interface ExportPageInput {
+  id: string
+  text: string
+  chapterTitle?: string
+}
+
 export interface ExportEpubRequest {
   metadata: BookMetadata
-  pages: { id: string; text: string }[]
+  pages: ExportPageInput[]
+  destPath: string
+}
+
+export interface ExportPdfRequest {
+  metadata: BookMetadata
+  pages: ExportPageInput[]
   destPath: string
 }
 
@@ -73,4 +88,12 @@ export interface ExportResult {
   success: boolean
   filePath?: string
   error?: string
+}
+
+export interface PdfExtractPagesRequest {
+  pdfPath: string
+}
+
+export interface PdfExtractPagesResponse {
+  imagePaths: string[]
 }
