@@ -35,5 +35,10 @@
   "workspace.exportSuccess": "已匯出至：{{path}}",
   "workspace.exportError": "匯出失敗：{{error}}",
   "workspace.ocrProvider": "OCR 使用的 AI 服務商",
-  "workspace.translateProvider": "翻譯使用的 AI 服務商"
+  "workspace.translateProvider": "翻譯使用的 AI 服務商",
+  "workspace.calibreSection": "轉換為 AZW3 / MOBI（Kindle 舊格式）",
+  "workspace.calibreNotFound": "未偵測到本機安裝的 Calibre。請先安裝免費開源的 Calibre（calibre-ebook.com）才能轉換；或者，Amazon 自 2022 年起已支援將 EPUB 直接傳送到 Kindle（Send to Kindle），多數情況下其實不需要 AZW3/MOBI。",
+  "workspace.calibreNeedsEpub": "請先匯出 EPUB，才能轉換成 AZW3/MOBI。",
+  "workspace.convertToAzw3": "轉換為 AZW3",
+  "workspace.convertToMobi": "轉換為 MOBI"
 }

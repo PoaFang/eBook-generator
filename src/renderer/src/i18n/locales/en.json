@@ -35,5 +35,10 @@
   "workspace.exportSuccess": "Exported to: {{path}}",
   "workspace.exportError": "Export failed: {{error}}",
   "workspace.ocrProvider": "AI provider for OCR",
-  "workspace.translateProvider": "AI provider for translation"
+  "workspace.translateProvider": "AI provider for translation",
+  "workspace.calibreSection": "Convert to AZW3 / MOBI (older Kindle formats)",
+  "workspace.calibreNotFound": "Calibre was not found on this computer. Install the free, open-source Calibre (calibre-ebook.com) to enable this conversion; alternatively, Amazon's Send to Kindle has accepted EPUB directly since 2022, so AZW3/MOBI usually isn't needed anymore.",
+  "workspace.calibreNeedsEpub": "Export an EPUB first to enable converting it to AZW3/MOBI.",
+  "workspace.convertToAzw3": "Convert to AZW3",
+  "workspace.convertToMobi": "Convert to MOBI"
 }

@@ -35,5 +35,10 @@
   "workspace.exportSuccess": "Diekspor ke: {{path}}",
   "workspace.exportError": "Ekspor gagal: {{error}}",
   "workspace.ocrProvider": "Penyedia AI untuk OCR",
-  "workspace.translateProvider": "Penyedia AI untuk terjemahan"
+  "workspace.translateProvider": "Penyedia AI untuk terjemahan",
+  "workspace.calibreSection": "Konversi ke AZW3 / MOBI (format Kindle lama)",
+  "workspace.calibreNotFound": "Calibre tidak ditemukan di komputer ini. Instal Calibre yang gratis dan open-source (calibre-ebook.com) untuk mengaktifkan konversi ini; sebagai alternatif, Send to Kindle dari Amazon telah menerima EPUB secara langsung sejak 2022, sehingga AZW3/MOBI biasanya tidak lagi diperlukan.",
+  "workspace.calibreNeedsEpub": "Ekspor EPUB terlebih dahulu untuk mengaktifkan konversi ke AZW3/MOBI.",
+  "workspace.convertToAzw3": "Konversi ke AZW3",
+  "workspace.convertToMobi": "Konversi ke MOBI"
 }

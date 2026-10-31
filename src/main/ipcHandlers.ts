@@ -4,6 +4,8 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { IPC } from '@shared/ipcChannels'
 import type {
+  CalibreConvertRequest,
+  CalibreOutputFormat,
   ExportEpubRequest,
   ExportPdfRequest,
   ExportResult,
@@ -20,6 +22,7 @@ import { buildEpub } from './epub/buildEpub'
 import { exportPdf } from './pdf/exportPdf'
 import { extractPdfPagesToImages } from './pdfPages'
 import { registerTempDir, cleanupAllTempDirs } from './tempDirs'
+import { isCalibreAvailable, convertEpubWithCalibre } from './calibre'
 
 const IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png', 'webp', 'heic', 'tiff', 'tif', 'bmp']
 
@@ -123,6 +126,26 @@ export function registerIpcHandlers(mainWindow: BrowserWindow, keyStore: KeyStor
 
   ipcMain.handle(IPC.EXPORT_PDF, async (_event, request: ExportPdfRequest): Promise<ExportResult> => {
     return exportPdf(request)
+  })
+
+  ipcMain.handle(IPC.CALIBRE_CHECK_AVAILABLE, () => isCalibreAvailable())
+
+  ipcMain.handle(IPC.DIALOG_SAVE_CALIBRE_OUTPUT, async (_event, defaultName: string, format: CalibreOutputFormat) => {
+    const result = await dialog.showSaveDialog(mainWindow, {
+      defaultPath: `${defaultName}.${format}`,
+      filters: [{ name: format.toUpperCase(), extensions: [format] }]
+    })
+    if (result.canceled || !result.filePath) return null
+    return result.filePath
+  })
+
+  ipcMain.handle(IPC.CALIBRE_CONVERT, async (_event, request: CalibreConvertRequest): Promise<ExportResult> => {
+    try {
+      await convertEpubWithCalibre(request.epubPath, request.destPath)
+      return { success: true, filePath: request.destPath }
+    } catch (error) {
+      return { success: false, error: error instanceof Error ? error.message : String(error) }
+    }
   })
 
   app.on('before-quit', () => {

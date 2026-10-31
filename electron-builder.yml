@@ -1,0 +1,36 @@
+appId: com.poafang.fayinliuchuan
+productName: 法音流傳
+copyright: Copyright © 2026 PoaFang
+directories:
+  output: release
+  buildResources: build
+files:
+  - out/**/*
+  - package.json
+asarUnpack:
+  - '**/*.node'
+  - '**/node_modules/sharp/**'
+  - '**/node_modules/@img/**'
+mac:
+  category: public.app-category.productivity
+  target:
+    - target: dmg
+      arch: [x64, arm64]
+    - target: zip
+      arch: [x64, arm64]
+win:
+  target:
+    - target: nsis
+      arch: [x64, arm64]
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+linux:
+  category: Office
+  synopsis: 將印刷書頁影像透過 AI OCR 轉換為多語言電子書
+  syncDesktopName: true
+  target:
+    - target: AppImage
+      arch: [x64, arm64]
+    - target: deb
+      arch: [x64, arm64]

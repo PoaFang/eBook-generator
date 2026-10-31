@@ -35,5 +35,10 @@
   "workspace.exportSuccess": "已导出至：{{path}}",
   "workspace.exportError": "导出失败：{{error}}",
   "workspace.ocrProvider": "OCR 使用的 AI 服务商",
-  "workspace.translateProvider": "翻译使用的 AI 服务商"
+  "workspace.translateProvider": "翻译使用的 AI 服务商",
+  "workspace.calibreSection": "转换为 AZW3 / MOBI（Kindle 旧格式）",
+  "workspace.calibreNotFound": "未侦测到本机安装的 Calibre。请先安装免费开源的 Calibre（calibre-ebook.com）才能转换；另外，Amazon 自 2022 年起已支持将 EPUB 直接传送到 Kindle（Send to Kindle），多数情况下其实不需要 AZW3/MOBI。",
+  "workspace.calibreNeedsEpub": "请先导出 EPUB，才能转换成 AZW3/MOBI。",
+  "workspace.convertToAzw3": "转换为 AZW3",
+  "workspace.convertToMobi": "转换为 MOBI"
 }

@@ -4,7 +4,15 @@
   "version": "0.1.0",
   "description": "將印刷書頁影像透過 AI OCR 轉換為多語言電子書，自動跳過手寫筆跡標註",
   "main": "./out/main/index.js",
-  "author": "PoaFang",
+  "author": {
+    "name": "PoaFang",
+    "email": "poa.fang@gmail.com"
+  },
+  "homepage": "https://github.com/PoaFang/fayin-liuchuan",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/PoaFang/fayin-liuchuan.git"
+  },
   "license": "MIT",
   "private": true,
   "type": "module",
@@ -16,7 +24,10 @@
     "typecheck": "npm run typecheck:node && npm run typecheck:web",
     "test": "vitest run",
     "test:watch": "vitest",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "dist:linux": "npm run build && electron-builder --linux",
+    "dist:mac": "npm run build && electron-builder --mac",
+    "dist:win": "npm run build && electron-builder --win"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.3.0",

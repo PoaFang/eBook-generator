@@ -106,6 +106,15 @@ function runSmokeTest(mainWindow: BrowserWindow, keyStore: KeyStore): void {
       console.log(`[smoke-test:export-roundtrip] FAILED: ${error instanceof Error ? error.stack : error}`)
     }
 
+    try {
+      const calibreAvailable = await mainWindow.webContents.executeJavaScript(
+        'window.api.calibre.checkAvailable()'
+      )
+      console.log(`[smoke-test:calibre-available] ${calibreAvailable}`)
+    } catch (error) {
+      console.log(`[smoke-test:calibre-available] FAILED: ${error instanceof Error ? error.stack : error}`)
+    }
+
     app.exit(0)
   })
 }

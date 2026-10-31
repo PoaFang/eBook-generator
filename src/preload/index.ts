@@ -2,6 +2,8 @@ import { contextBridge, ipcRenderer } from 'electron'
 import { IPC } from '@shared/ipcChannels'
 import type {
   ApiKeyEntry,
+  CalibreConvertRequest,
+  CalibreOutputFormat,
   ExportEpubRequest,
   ExportPdfRequest,
   ExportResult,
@@ -24,7 +26,9 @@ const api: FayinApi = {
     selectSourceFiles: (): Promise<string[]> => ipcRenderer.invoke(IPC.DIALOG_SELECT_SOURCE_FILES),
     selectCoverImage: (): Promise<string | null> => ipcRenderer.invoke(IPC.DIALOG_SELECT_COVER_IMAGE),
     saveEpub: (defaultName: string): Promise<string | null> => ipcRenderer.invoke(IPC.DIALOG_SAVE_EPUB, defaultName),
-    savePdf: (defaultName: string): Promise<string | null> => ipcRenderer.invoke(IPC.DIALOG_SAVE_PDF, defaultName)
+    savePdf: (defaultName: string): Promise<string | null> => ipcRenderer.invoke(IPC.DIALOG_SAVE_PDF, defaultName),
+    saveCalibreOutput: (defaultName: string, format: CalibreOutputFormat): Promise<string | null> =>
+      ipcRenderer.invoke(IPC.DIALOG_SAVE_CALIBRE_OUTPUT, defaultName, format)
   },
   ocr: {
     runPage: (request: OcrRequest): Promise<OcrResponse> => ipcRenderer.invoke(IPC.OCR_RUN_PAGE, request)
@@ -38,7 +42,11 @@ const api: FayinApi = {
       ipcRenderer.invoke(IPC.PDF_EXTRACT_PAGES, pdfPath)
   },
   exportEpub: (request: ExportEpubRequest): Promise<ExportResult> => ipcRenderer.invoke(IPC.EXPORT_EPUB, request),
-  exportPdf: (request: ExportPdfRequest): Promise<ExportResult> => ipcRenderer.invoke(IPC.EXPORT_PDF, request)
+  exportPdf: (request: ExportPdfRequest): Promise<ExportResult> => ipcRenderer.invoke(IPC.EXPORT_PDF, request),
+  calibre: {
+    checkAvailable: (): Promise<boolean> => ipcRenderer.invoke(IPC.CALIBRE_CHECK_AVAILABLE),
+    convert: (request: CalibreConvertRequest): Promise<ExportResult> => ipcRenderer.invoke(IPC.CALIBRE_CONVERT, request)
+  }
 }
 
 contextBridge.exposeInMainWorld('api', api)

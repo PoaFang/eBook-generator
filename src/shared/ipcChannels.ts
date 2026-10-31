@@ -10,5 +10,8 @@ export const IPC = {
   TRANSLATE_RUN_PAGE: 'translate:runPage',
   PDF_EXTRACT_PAGES: 'pdf:extractPages',
   EXPORT_EPUB: 'export:epub',
-  EXPORT_PDF: 'export:pdf'
+  EXPORT_PDF: 'export:pdf',
+  CALIBRE_CHECK_AVAILABLE: 'calibre:checkAvailable',
+  CALIBRE_CONVERT: 'calibre:convert',
+  DIALOG_SAVE_CALIBRE_OUTPUT: 'dialog:saveCalibreOutput'
 } as const

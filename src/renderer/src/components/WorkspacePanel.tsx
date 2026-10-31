@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import type { BookMetadata, ExportPageInput, OutputLanguage, PageItem, ProviderId, TextMode } from '@shared/types'
 import { OCR_CAPABLE_PROVIDERS, OUTPUT_LANGUAGES, TEXT_PROVIDERS } from '@shared/types'
 import PageRow from './PageRow'
+import CalibreExportSection from './CalibreExportSection'
 
 const PROVIDER_LABELS: Record<ProviderId, string> = {
   openai: 'OpenAI',
@@ -27,6 +28,7 @@ export default function WorkspacePanel(): React.JSX.Element {
   const [translateProvider, setTranslateProvider] = useState<ProviderId>('openai')
   const [exportMessage, setExportMessage] = useState<string>('')
   const [isImporting, setIsImporting] = useState(false)
+  const [lastEpubPath, setLastEpubPath] = useState<string | undefined>(undefined)
 
   const importSourceFiles = async (): Promise<void> => {
     const paths = await window.api.dialog.selectSourceFiles()
@@ -124,6 +126,7 @@ export default function WorkspacePanel(): React.JSX.Element {
     const destPath = await window.api.dialog.saveEpub(bookTitle || 'book')
     if (!destPath) return
     const result = await window.api.exportEpub({ metadata: buildMetadata(), pages: buildExportPages(), destPath })
+    if (result.success) setLastEpubPath(result.filePath)
     setExportMessage(
       result.success
         ? t('workspace.exportSuccess', { path: result.filePath })
@@ -244,6 +247,8 @@ export default function WorkspacePanel(): React.JSX.Element {
           ))
         )}
       </div>
+
+      <CalibreExportSection lastEpubPath={lastEpubPath} defaultName={bookTitle || 'book'} />
     </div>
   )
 }

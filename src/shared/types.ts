@@ -97,3 +97,10 @@ export interface PdfExtractPagesRequest {
 export interface PdfExtractPagesResponse {
   imagePaths: string[]
 }
+
+export type CalibreOutputFormat = 'azw3' | 'mobi'
+
+export interface CalibreConvertRequest {
+  epubPath: string
+  destPath: string
+}

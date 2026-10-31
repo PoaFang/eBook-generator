@@ -35,5 +35,10 @@
   "workspace.exportSuccess": "書き出しました：{{path}}",
   "workspace.exportError": "書き出しに失敗しました：{{error}}",
   "workspace.ocrProvider": "OCRに使用するAIプロバイダー",
-  "workspace.translateProvider": "翻訳に使用するAIプロバイダー"
+  "workspace.translateProvider": "翻訳に使用するAIプロバイダー",
+  "workspace.calibreSection": "AZW3／MOBI（旧Kindle形式）に変換",
+  "workspace.calibreNotFound": "このパソコンにCalibreが見つかりません。無料でオープンソースのCalibre（calibre-ebook.com）をインストールすると変換できます。なお、Amazonは2022年以降Send to KindleでEPUBを直接受け付けているため、通常AZW3/MOBIは不要です。",
+  "workspace.calibreNeedsEpub": "AZW3/MOBIへ変換するには、先にEPUBを書き出してください。",
+  "workspace.convertToAzw3": "AZW3に変換",
+  "workspace.convertToMobi": "MOBIに変換"
 }
