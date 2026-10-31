@@ -27,5 +27,6 @@
   "workspace.exportEpub": "匯出 EPUB",
   "workspace.exportSuccess": "EPUB 已匯出至：{{path}}",
   "workspace.exportError": "匯出失敗：{{error}}",
-  "workspace.ocrProvider": "OCR 使用的 AI 服務商"
+  "workspace.ocrProvider": "OCR 使用的 AI 服務商",
+  "workspace.translateProvider": "翻譯使用的 AI 服務商"
 }

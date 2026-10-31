@@ -1,27 +1,40 @@
 import type { ProviderId } from '@shared/types'
 import type { OcrProvider, TranslateProvider } from './types'
 import { OpenAiProvider } from './openaiProvider'
+import { GeminiProvider } from './geminiProvider'
+import { ClaudeProvider } from './claudeProvider'
+import { DeepSeekProvider } from './deepseekProvider'
 
 const openai = new OpenAiProvider()
+const gemini = new GeminiProvider()
+const claude = new ClaudeProvider()
+const deepseek = new DeepSeekProvider()
 
-/** Phase 2 will add Gemini and Claude here as OCR-capable providers. */
+/** DeepSeek has no stable vision model yet, so it is intentionally excluded here. */
 export function getOcrProvider(provider: ProviderId): OcrProvider {
   switch (provider) {
     case 'openai':
       return openai
+    case 'gemini':
+      return gemini
+    case 'claude':
+      return claude
     default:
-      throw new Error(
-        `Provider "${provider}" does not yet support OCR in this build. Only OpenAI vision OCR is wired up in this phase.`
-      )
+      throw new Error(`Provider "${provider}" does not support OCR in this build.`)
   }
 }
 
-/** Phase 2 will add Gemini, Claude and DeepSeek (text-only) here. */
 export function getTranslateProvider(provider: ProviderId): TranslateProvider {
   switch (provider) {
     case 'openai':
       return openai
+    case 'gemini':
+      return gemini
+    case 'claude':
+      return claude
+    case 'deepseek':
+      return deepseek
     default:
-      throw new Error(`Provider "${provider}" does not yet support translation in this build.`)
+      throw new Error(`Provider "${provider}" does not support translation in this build.`)
   }
 }

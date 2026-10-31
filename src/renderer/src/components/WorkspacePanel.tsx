@@ -1,10 +1,15 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { OutputLanguage, PageItem, ProviderId, TextMode } from '@shared/types'
-import { OUTPUT_LANGUAGES } from '@shared/types'
+import { OCR_CAPABLE_PROVIDERS, OUTPUT_LANGUAGES, TEXT_PROVIDERS } from '@shared/types'
 import PageRow from './PageRow'
 
-const OCR_PROVIDER: ProviderId = 'openai'
+const PROVIDER_LABELS: Record<ProviderId, string> = {
+  openai: 'OpenAI',
+  gemini: 'Google Gemini',
+  claude: 'Anthropic Claude',
+  deepseek: 'DeepSeek'
+}
 
 export default function WorkspacePanel(): React.JSX.Element {
   const { t } = useTranslation()
@@ -13,6 +18,8 @@ export default function WorkspacePanel(): React.JSX.Element {
   const [bookAuthor, setBookAuthor] = useState('')
   const [textMode, setTextMode] = useState<TextMode>('keep-original')
   const [targetLanguage, setTargetLanguage] = useState<OutputLanguage>('zh-TW')
+  const [ocrProvider, setOcrProvider] = useState<ProviderId>('openai')
+  const [translateProvider, setTranslateProvider] = useState<ProviderId>('openai')
   const [exportMessage, setExportMessage] = useState<string>('')
 
   const importImages = async (): Promise<void> => {
@@ -38,14 +45,14 @@ export default function WorkspacePanel(): React.JSX.Element {
     if (!page) return
     updatePage(id, { status: 'processing', error: undefined })
     try {
-      const ocrResult = await window.api.ocr.runPage({ pageId: id, imagePath: page.sourcePath, provider: OCR_PROVIDER })
+      const ocrResult = await window.api.ocr.runPage({ pageId: id, imagePath: page.sourcePath, provider: ocrProvider })
       let translatedText: string | undefined
       if (textMode === 'translate') {
         const translateResult = await window.api.translate.runPage({
           pageId: id,
           text: ocrResult.text,
           targetLanguage,
-          provider: OCR_PROVIDER
+          provider: translateProvider
         })
         translatedText = translateResult.text
       }
@@ -94,12 +101,34 @@ export default function WorkspacePanel(): React.JSX.Element {
           <input type="text" value={bookAuthor} onChange={(e) => setBookAuthor(e.target.value)} />
         </div>
         <div className="field-row">
+          <label>{t('workspace.ocrProvider')}</label>
+          <select value={ocrProvider} onChange={(e) => setOcrProvider(e.target.value as ProviderId)}>
+            {OCR_CAPABLE_PROVIDERS.map((p) => (
+              <option key={p} value={p}>
+                {PROVIDER_LABELS[p]}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="field-row">
           <label>{t('workspace.textMode')}</label>
           <select value={textMode} onChange={(e) => setTextMode(e.target.value as TextMode)}>
             <option value="keep-original">{t('workspace.textMode.keepOriginal')}</option>
             <option value="translate">{t('workspace.textMode.translate')}</option>
           </select>
         </div>
+        {textMode === 'translate' && (
+          <div className="field-row">
+            <label>{t('workspace.translateProvider')}</label>
+            <select value={translateProvider} onChange={(e) => setTranslateProvider(e.target.value as ProviderId)}>
+              {TEXT_PROVIDERS.map((p) => (
+                <option key={p} value={p}>
+                  {PROVIDER_LABELS[p]}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
         <div className="field-row">
           <label>{t('workspace.targetLanguage')}</label>
           <select value={targetLanguage} onChange={(e) => setTargetLanguage(e.target.value as OutputLanguage)}>

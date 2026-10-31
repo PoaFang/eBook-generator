@@ -27,5 +27,6 @@
   "workspace.exportEpub": "Export EPUB",
   "workspace.exportSuccess": "EPUB exported to: {{path}}",
   "workspace.exportError": "Export failed: {{error}}",
-  "workspace.ocrProvider": "AI provider for OCR"
+  "workspace.ocrProvider": "AI provider for OCR",
+  "workspace.translateProvider": "AI provider for translation"
 }
