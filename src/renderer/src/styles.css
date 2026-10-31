@@ -1,0 +1,151 @@
+:root {
+  color-scheme: light dark;
+  font-family: -apple-system, 'Segoe UI', 'Noto Sans TC', 'Noto Sans', sans-serif;
+}
+
+body {
+  margin: 0;
+  background: #f5f5f3;
+  color: #1a1a1a;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1.5rem;
+  background: #2b2420;
+  color: #f0ead8;
+}
+
+.app-header h1 {
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.app-nav button {
+  background: transparent;
+  border: none;
+  color: #d8cdb0;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  font-size: 0.95rem;
+  border-bottom: 2px solid transparent;
+}
+
+.app-nav button.active {
+  color: #fff;
+  border-bottom-color: #c9a33b;
+}
+
+.app-main {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.5rem;
+}
+
+.panel {
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.card {
+  background: #fff;
+  border-radius: 8px;
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.field-row {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.field-row label {
+  min-width: 140px;
+  font-weight: 600;
+}
+
+input[type='text'],
+input[type='password'],
+select,
+textarea {
+  flex: 1;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 0.95rem;
+}
+
+textarea {
+  min-height: 90px;
+  font-family: inherit;
+  resize: vertical;
+}
+
+button.primary {
+  background: #c9a33b;
+  border: none;
+  color: #2b2420;
+  padding: 0.5rem 1.25rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+button.secondary {
+  background: #eee;
+  border: 1px solid #ccc;
+  padding: 0.4rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.page-row {
+  border: 1px solid #e0ddd4;
+  border-radius: 6px;
+  padding: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.page-row-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.status-badge {
+  font-size: 0.8rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 10px;
+  background: #eee;
+}
+
+.status-badge.done { background: #d9f0d3; }
+.status-badge.error { background: #f6d3d3; }
+.status-badge.processing { background: #fdf0c0; }
+
+.privacy-note {
+  font-size: 0.85rem;
+  color: #666;
+  margin-top: 0.5rem;
+}
